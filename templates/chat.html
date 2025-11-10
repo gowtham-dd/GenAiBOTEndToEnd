@@ -11,14 +11,8 @@
         :root {
             --primary-color: #2563eb;
             --secondary-color: #3b82f6;
-            --accent-color: #60a5fa;
-            --light-bg: #f8fafc;
-            --dark-text: #1e293b;
-            --light-text: #64748b;
-            --bot-bubble: #e0f2fe;
-            --user-bubble: #dbeafe;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
+            --sidebar-bg: #f8fafc;
+            --sidebar-border: #e2e8f0;
         }
 
         * {
@@ -29,86 +23,133 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            background: #ffffff;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .chat-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            height: 80vh;
-            max-width: 800px;
-            width: 100%;
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 300px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-border);
             display: flex;
             flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--sidebar-border);
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .new-chat-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chat-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .chat-item:hover {
+            background: #e2e8f0;
+        }
+
+        .chat-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chat-title {
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .chat-meta {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .chat-actions {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .chat-item:hover .chat-actions {
+            opacity: 1;
+        }
+
+        .delete-chat {
+            background: none;
+            border: none;
+            color: #ef4444;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Main Chat Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .chat-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
+            background: white;
             padding: 20px 25px;
+            border-bottom: 1px solid var(--sidebar-border);
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
         .chat-header img {
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.3);
         }
 
         .chat-header-info h3 {
             font-weight: 600;
             margin: 0;
-            font-size: 1.3rem;
-        }
-
-        .chat-header-info p {
-            margin: 0;
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            background: var(--success-color);
-            border-radius: 50%;
-            margin-left: auto;
-            position: relative;
-        }
-
-        .status-indicator::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--success-color);
-            border-radius: 50%;
-            top: -3px;
-            left: -3px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 1; }
-            70% { transform: scale(1.4); opacity: 0; }
-            100% { transform: scale(0.8); opacity: 0; }
+            font-size: 1.2rem;
         }
 
         .chat-messages {
             flex: 1;
             padding: 25px;
             overflow-y: auto;
-            background: var(--light-bg);
+            background: #f8fafc;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -144,7 +185,7 @@
 
         .message.bot .message-bubble {
             background: white;
-            color: var(--dark-text);
+            color: #1e293b;
             border-bottom-left-radius: 5px;
         }
 
@@ -171,7 +212,7 @@
         }
 
         .input-group {
-            background: var(--light-bg);
+            background: #f8fafc;
             border-radius: 25px;
             padding: 5px;
             border: 2px solid transparent;
@@ -208,13 +249,58 @@
             transition: all 0.3s ease;
         }
 
-        .btn-send:hover {
+        .btn-send:hover:not(:disabled) {
             background: var(--secondary-color);
             transform: translateY(-2px);
         }
 
-        .btn-send:active {
-            transform: translateY(0);
+        .btn-send:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .message-limit {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .message-limit.warning {
+            color: #f59e0b;
+        }
+
+        .message-limit.error {
+            color: #ef4444;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .welcome-message i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        /* Scrollbar styling */
+        .chat-list::-webkit-scrollbar,
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-list::-webkit-scrollbar-track,
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-list::-webkit-scrollbar-thumb,
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
         }
 
         .typing-indicator {
@@ -232,7 +318,7 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background: var(--light-text);
+            background: #6b7280;
             border-radius: 50%;
             animation: typing 1.4s infinite ease-in-out;
         }
@@ -245,50 +331,9 @@
             40% { transform: scale(1); opacity: 1; }
         }
 
-        .welcome-message {
-            text-align: center;
-            padding: 30px 20px;
-            color: var(--light-text);
-        }
-
-        .welcome-message i {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        .disclaimer {
-            font-size: 0.8rem;
-            color: var(--light-text);
-            text-align: center;
-            padding: 10px 20px;
-            border-top: 1px solid #e2e8f0;
-            background: var(--light-bg);
-        }
-
-        /* Scrollbar styling */
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Responsive design */
         @media (max-width: 768px) {
-            .chat-container {
-                height: 90vh;
-                border-radius: 15px;
+            .sidebar {
+                width: 250px;
             }
             
             .chat-header {
@@ -306,70 +351,162 @@
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="MediBot">
-            <div class="chat-header-info">
-                <h3>MediBot Assistant</h3>
-                <p>Your AI medical information partner</p>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" id="newChatBtn">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
             </div>
-            <div class="status-indicator"></div>
-        </div>
-
-        <div class="chat-messages" id="chatMessages">
-            <div class="welcome-message">
-                <i class="fas fa-stethoscope"></i>
-                <h4>Welcome to MediBot!</h4>
-                <p>I'm here to provide medical information and answer your health-related questions.</p>
-                <small>Please consult healthcare professionals for medical advice.</small>
+            <div class="chat-list" id="chatList">
+                <!-- Chat items will be loaded here -->
             </div>
         </div>
 
-        <div class="typing-indicator" id="typingIndicator">
-            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Typing..." class="message-avatar">
-            <div class="message-bubble">
-                <div class="typing-dots">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="chat-header">
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="MediBot">
+                <div class="chat-header-info">
+                    <h3 id="currentChatTitle">MediBot Assistant</h3>
+                    <p>Your AI medical information partner</p>
                 </div>
             </div>
-        </div>
 
-        <div class="disclaimer">
-            <small><i class="fas fa-exclamation-triangle"></i> This is an AI assistant. Always consult healthcare professionals for medical diagnoses and treatment.</small>
-        </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <i class="fas fa-stethoscope"></i>
+                    <h4>Welcome to MediBot!</h4>
+                    <p>Start a new conversation or select an existing chat from the sidebar.</p>
+                    <small>Please consult healthcare professionals for medical advice.</small>
+                </div>
+            </div>
 
-        <div class="chat-input-container">
-            <form id="messageForm" class="input-group">
-                <input type="text" id="messageInput" name="msg" class="form-control" 
-                       placeholder="Ask about symptoms, conditions, or treatments..." 
-                       autocomplete="off" required>
-                <button type="submit" class="btn-send" id="sendButton">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
+            <div class="typing-indicator" id="typingIndicator">
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Typing..." class="message-avatar">
+                <div class="message-bubble">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <form id="messageForm" class="input-group">
+                    <input type="text" id="messageInput" name="msg" class="form-control" 
+                           placeholder="Ask about symptoms, conditions, or treatments..." 
+                           autocomplete="off" maxlength="500" required>
+                    <button type="submit" class="btn-send" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+                <div class="message-limit" id="messageLimit">
+                    Maximum 500 characters • <span id="remainingMessages">10</span> messages remaining
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
-            const chatMessages = $('#chatMessages');
-            const messageForm = $('#messageForm');
-            const messageInput = $('#messageInput');
-            const typingIndicator = $('#typingIndicator');
-            const sendButton = $('#sendButton');
-
-            // Auto-scroll to bottom
-            function scrollToBottom() {
-                chatMessages.scrollTop(chatMessages[0].scrollHeight);
+        class ChatManager {
+            constructor() {
+                this.currentChatId = null;
+                this.init();
             }
 
-            // Add message to chat
-            function addMessage(message, isUser = false) {
-                const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            async init() {
+                await this.loadChats();
+                await this.loadCurrentChat();
+                this.setupEventListeners();
+                this.updateMessageLimit();
+            }
+
+            async loadChats() {
+                try {
+                    const response = await fetch('/chats');
+                    const data = await response.json();
+                    this.renderChatList(data.chats);
+                } catch (error) {
+                    console.error('Error loading chats:', error);
+                }
+            }
+
+            async loadCurrentChat() {
+                try {
+                    const response = await fetch('/current-chat');
+                    const data = await response.json();
+                    this.renderMessages(data.messages);
+                    this.updateMessageLimit(data.remaining_messages);
+                    document.getElementById('currentChatTitle').textContent = data.title || 'MediBot Assistant';
+                } catch (error) {
+                    console.error('Error loading current chat:', error);
+                }
+            }
+
+            renderChatList(chats) {
+                const chatList = document.getElementById('chatList');
+                chatList.innerHTML = '';
+
+                chats.forEach(chat => {
+                    const chatItem = document.createElement('div');
+                    chatItem.className = `chat-item ${chat.is_active ? 'active' : ''}`;
+                    chatItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="chat-title">${chat.title}</div>
+                                <div class="chat-meta">
+                                    ${chat.message_count} messages • ${chat.created_at}
+                                </div>
+                            </div>
+                            <div class="chat-actions">
+                                <button class="delete-chat" onclick="chatManager.deleteChat('${chat.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    chatItem.addEventListener('click', () => this.switchChat(chat.id));
+                    chatList.appendChild(chatItem);
+                });
+            }
+
+            renderMessages(messages) {
+                const chatMessages = document.getElementById('chatMessages');
+                
+                if (!messages || messages.length === 0) {
+                    chatMessages.innerHTML = `
+                        <div class="welcome-message">
+                            <i class="fas fa-stethoscope"></i>
+                            <h4>Welcome to MediBot!</h4>
+                            <p>Start a new conversation or select an existing chat from the sidebar.</p>
+                            <small>Please consult healthcare professionals for medical advice.</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                chatMessages.innerHTML = '';
+                messages.forEach(message => {
+                    this.addMessageToChat(message.content, message.type === 'user', message.timestamp);
+                });
+                this.scrollToBottom();
+            }
+
+            addMessageToChat(message, isUser = false, timestamp = null) {
+                const chatMessages = document.getElementById('chatMessages');
+                const welcomeMessage = chatMessages.querySelector('.welcome-message');
+                
+                if (welcomeMessage) {
+                    welcomeMessage.remove();
+                }
+
+                const time = timestamp || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const avatar = isUser ? 
                     'https://i.ibb.co/d5b84Xw/Untitled-design.png' : 
                     'https://cdn-icons-png.flaticon.com/512/4712/4712035.png';
@@ -379,72 +516,164 @@
                         <img src="${avatar}" alt="${isUser ? 'User' : 'Bot'}" class="message-avatar">
                         <div class="message-bubble">
                             <div class="message-content">${message}</div>
-                            <div class="message-time">${timestamp}</div>
+                            <div class="message-time">${time}</div>
                         </div>
                     </div>
                 `;
                 
-                chatMessages.append(messageHtml);
-                scrollToBottom();
+                chatMessages.insertAdjacentHTML('beforeend', messageHtml);
+                this.scrollToBottom();
             }
 
-            // Show/hide typing indicator
-            function showTyping() {
-                typingIndicator.show();
-                scrollToBottom();
+            scrollToBottom() {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
-            function hideTyping() {
-                typingIndicator.hide();
+            async switchChat(chatId) {
+                try {
+                    const response = await fetch(`/chats/${chatId}`, { method: 'POST' });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderMessages(data.messages);
+                        document.getElementById('currentChatTitle').textContent = data.title;
+                        this.updateMessageLimit(10 - data.message_count);
+                        await this.loadChats(); // Refresh sidebar
+                    }
+                } catch (error) {
+                    console.error('Error switching chat:', error);
+                }
             }
 
-            // Handle form submission
-            messageForm.on('submit', function(event) {
-                event.preventDefault();
+            async createNewChat() {
+                try {
+                    const response = await fetch('/chats/new', { method: 'POST' });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderMessages([]);
+                        document.getElementById('currentChatTitle').textContent = 'New Chat';
+                        this.updateMessageLimit(10);
+                        await this.loadChats(); // Refresh sidebar
+                    }
+                } catch (error) {
+                    console.error('Error creating new chat:', error);
+                }
+            }
+
+            async deleteChat(chatId) {
+                if (!confirm('Are you sure you want to delete this chat?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/chats/${chatId}/delete`, { method: 'POST' });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        await this.loadChats();
+                        await this.loadCurrentChat();
+                    }
+                } catch (error) {
+                    console.error('Error deleting chat:', error);
+                }
+            }
+
+            updateMessageLimit(remaining = 10) {
+                const messageLimit = document.getElementById('messageLimit');
+                const remainingSpan = document.getElementById('remainingMessages');
                 
-                const message = messageInput.val().trim();
-                if (!message) return;
+                remainingSpan.textContent = remaining;
+                
+                messageLimit.className = 'message-limit';
+                if (remaining <= 3) {
+                    messageLimit.classList.add('warning');
+                }
+                if (remaining === 0) {
+                    messageLimit.classList.add('error');
+                }
+            }
 
-                // Add user message
-                addMessage(message, true);
-                messageInput.val('');
-                sendButton.prop('disabled', true);
+            setupEventListeners() {
+                // New chat button
+                document.getElementById('newChatBtn').addEventListener('click', () => {
+                    this.createNewChat();
+                });
 
-                // Show typing indicator
-                showTyping();
+                // Message form submission
+                document.getElementById('messageForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.sendMessage();
+                });
 
-                // Send to backend
-                $.ajax({
-                    url: '/get',
-                    method: 'POST',
-                    data: { msg: message },
-                    success: function(response) {
-                        hideTyping();
-                        addMessage(response);
-                    },
-                    error: function(xhr, status, error) {
-                        hideTyping();
-                        addMessage('Sorry, I encountered an error. Please try again.');
-                        console.error('Error:', error);
-                    },
-                    complete: function() {
-                        sendButton.prop('disabled', false);
-                        messageInput.focus();
+                // Character counter
+                document.getElementById('messageInput').addEventListener('input', (e) => {
+                    const maxLength = 500;
+                    const currentLength = e.target.value.length;
+                    if (currentLength > maxLength) {
+                        e.target.value = e.target.value.substring(0, maxLength);
                     }
                 });
-            });
+            }
 
-            // Enable send button when there's text
-            messageInput.on('input', function() {
-                sendButton.prop('disabled', !$(this).val().trim());
-            });
+            async sendMessage() {
+                const messageInput = document.getElementById('messageInput');
+                const sendButton = document.getElementById('sendButton');
+                const message = messageInput.value.trim();
 
-            // Focus input on load
-            messageInput.focus();
+                if (!message) return;
 
-            // Smooth scroll to bottom on load
-            setTimeout(scrollToBottom, 100);
-        });
+                // Add user message immediately
+                this.addMessageToChat(message, true);
+                messageInput.value = '';
+                sendButton.disabled = true;
+
+                // Show typing indicator
+                this.showTypingIndicator();
+
+                try {
+                    const formData = new FormData();
+                    formData.append('msg', message);
+
+                    const response = await fetch('/get', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.hideTypingIndicator();
+                        this.addMessageToChat(data.answer, false);
+                        this.updateMessageLimit(data.remaining_messages);
+                        await this.loadChats(); // Refresh sidebar to update message count
+                    } else {
+                        this.hideTypingIndicator();
+                        this.addMessageToChat(`Error: ${data.error}`, false);
+                    }
+                } catch (error) {
+                    this.hideTypingIndicator();
+                    this.addMessageToChat('Sorry, I encountered an error. Please try again.', false);
+                    console.error('Error:', error);
+                } finally {
+                    sendButton.disabled = false;
+                    messageInput.focus();
+                }
+            }
+
+            showTypingIndicator() {
+                document.getElementById('typingIndicator').style.display = 'flex';
+                this.scrollToBottom();
+            }
+
+            hideTypingIndicator() {
+                document.getElementById('typingIndicator').style.display = 'none';
+            }
+        }
+
+        // Initialize chat manager when page loads
+        const chatManager = new ChatManager();
     </script>
 </body>
 </html>
