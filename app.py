@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, session
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 from src.GENAIBOTENDTOEND.helper import download_embeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_groq import ChatGroq
@@ -9,11 +9,14 @@ from dotenv import load_dotenv
 from src.GENAIBOTENDTOEND.prompt import *
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
+import hashlib
+import re
 
 app = Flask(__name__)
 app.secret_key = 'medical-chatbot-secret-key-2024'
+app.permanent_session_lifetime = timedelta(days=7)
 
 load_dotenv()
 
@@ -21,6 +24,7 @@ PINECONE_API_KEY = os.environ.get('PINECONE_API_KEY')
 groq_api_key = os.environ['GROQ_API_KEY']
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 
+# Initialize embeddings and vector store
 embeddings = download_embeddings()
 index_name = "medical-chatbot" 
 docsearch = PineconeVectorStore.from_existing_index(
@@ -57,8 +61,49 @@ RESPONSE:
 
 prompt = ChatPromptTemplate.from_template(system_prompt)
 
-# Persistent storage in JSON file
+# User database
+USERS_FILE = "users.json"
 CHAT_STORAGE_FILE = "chat_sessions.json"
+
+def hash_password(password):
+    """Hash password using SHA-256"""
+    salt = app.secret_key.encode('utf-8')
+    return hashlib.sha256(password.encode('utf-8') + salt).hexdigest()
+
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def validate_password(password):
+    """Validate password strength"""
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain at least one uppercase letter"
+    if not re.search(r'[a-z]', password):
+        return False, "Password must contain at least one lowercase letter"
+    if not re.search(r'\d', password):
+        return False, "Password must contain at least one number"
+    return True, "Password is valid"
+
+def load_users():
+    """Load users from JSON file"""
+    try:
+        if os.path.exists(USERS_FILE):
+            with open(USERS_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Error loading users: {e}")
+    return {}
+
+def save_users(users):
+    """Save users to JSON file"""
+    try:
+        with open(USERS_FILE, 'w') as f:
+            json.dump(users, f, indent=2)
+    except Exception as e:
+        print(f"Error saving users: {e}")
 
 def load_chat_sessions():
     """Load chat sessions from JSON file"""
@@ -81,8 +126,7 @@ def save_chat_sessions(chat_sessions):
 def get_user_sessions():
     """Get or initialize user sessions with persistent storage"""
     if 'user_id' not in session:
-        session['user_id'] = str(uuid.uuid4())
-        print(f"New user session created: {session['user_id']}")
+        return None
     
     user_id = session['user_id']
     chat_sessions = load_chat_sessions()
@@ -97,6 +141,9 @@ def get_user_sessions():
 def create_new_chat():
     """Create a new chat session"""
     chat_sessions = get_user_sessions()
+    if not chat_sessions:
+        return None
+    
     user_id = session['user_id']
     chat_id = str(uuid.uuid4())
     
@@ -117,6 +164,9 @@ def create_new_chat():
 def get_current_chat():
     """Get current active chat from persistent storage"""
     chat_sessions = get_user_sessions()
+    if not chat_sessions:
+        return None
+    
     user_id = session['user_id']
     
     # Ensure user exists in sessions
@@ -128,6 +178,8 @@ def get_current_chat():
     if 'current_chat_id' not in session or session['current_chat_id'] not in chat_sessions[user_id]:
         # Create first chat
         chat_id = create_new_chat()
+        if not chat_id:
+            return None
         session['current_chat_id'] = chat_id
         print(f"Setting current chat to: {chat_id}")
         return chat_sessions[user_id][chat_id]
@@ -139,6 +191,9 @@ def get_current_chat():
 def update_chat_data(chat_data):
     """Update chat data in persistent storage"""
     chat_sessions = get_user_sessions()
+    if not chat_sessions:
+        return
+    
     user_id = session['user_id']
     chat_id = chat_data['id']
     
@@ -170,19 +225,126 @@ def format_chat_history(messages):
     
     return "\n".join(formatted)
 
+# ==================== AUTHENTICATION ROUTES (FIRST) ====================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # If user is already logged in, redirect to chat
+    if 'user_id' in session:
+        return redirect(url_for('index'))
+    
+    if request.method == "POST":
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        password = data.get('password', '').strip()
+        
+        if not email or not password:
+            return jsonify({"success": False, "error": "Email and password are required"}), 400
+        
+        users = load_users()
+        
+        if email not in users:
+            return jsonify({"success": False, "error": "Invalid email or password"}), 401
+        
+        hashed_password = hash_password(password)
+        if users[email]['password'] != hashed_password:
+            return jsonify({"success": False, "error": "Invalid email or password"}), 401
+        
+        # Set session
+        session.permanent = True
+        session['user_id'] = users[email]['user_id']
+        session['username'] = users[email]['username']
+        session['email'] = email
+        
+        return jsonify({
+            "success": True, 
+            "message": "Login successful",
+            "username": users[email]['username']
+        })
+    
+    return render_template('login.html')
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    # Handle POST first
+    if request.method == "POST":
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "error": "Invalid request"}), 400
+
+        username = data.get('username', '').strip()
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '').strip()
+        confirm_password = data.get('confirm_password', '').strip()
+
+        # ---- validation here (keep your existing code) ----
+
+        users = load_users()
+
+        if email in users:
+            return jsonify({"success": False, "error": "Email already registered"}), 400
+
+        user_id = str(uuid.uuid4())
+        users[email] = {
+            'user_id': user_id,
+            'username': username,
+            'email': email,
+            'password': hash_password(password),
+            'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        save_users(users)
+
+        return jsonify({
+            "success": True,
+            "message": "Registration successful! Please login."
+        })
+
+    # Handle GET separately
+    if 'user_id' in session:
+        return redirect(url_for('index'))
+
+    return render_template('register.html')
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route("/check-auth", methods=["GET"])
+def check_auth():
+    if 'user_id' in session:
+        return jsonify({
+            "authenticated": True,
+            "username": session.get('username', 'User')
+        })
+    return jsonify({"authenticated": False})
+
+# ==================== PROTECTED ROUTES (Require Authentication) ====================
+
 @app.route("/")
 def index():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
     try:
         # Initialize user session and current chat
-        get_user_sessions()
-        get_current_chat()
-        return render_template('chat.html')
+        chat_sessions = get_user_sessions()
+        if chat_sessions:
+            current_chat = get_current_chat()
+        return render_template('chat.html', username=session.get('username', 'User'))
     except Exception as e:
         print(f"Error in index route: {e}")
         return "Error initializing chat. Please refresh the page.", 500
 
 @app.route("/get", methods=["POST"])
 def chat():
+    if 'user_id' not in session:
+        return jsonify({"error": "Not authenticated"}), 401
+    
     try:
         msg = request.form["msg"].strip()
         
@@ -197,6 +359,8 @@ def chat():
         
         # Get current chat
         current_chat = get_current_chat()
+        if not current_chat:
+            return jsonify({"error": "No active chat session"}), 400
         
         # Check message limit
         if current_chat['message_count'] >= 10:
@@ -255,9 +419,14 @@ def chat():
 
 @app.route("/chats", methods=["GET"])
 def get_chats():
-    """Get all chat sessions for the user"""
+    if 'user_id' not in session:
+        return jsonify({"error": "Not authenticated"}), 401
+    
     try:
         chat_sessions = get_user_sessions()
+        if not chat_sessions:
+            return jsonify({"chats": []})
+        
         user_id = session['user_id']
         chats = []
         
@@ -281,9 +450,14 @@ def get_chats():
 
 @app.route("/chats/new", methods=["POST"])
 def new_chat():
-    """Create a new chat session"""
+    if 'user_id' not in session:
+        return jsonify({"error": "Not authenticated"}), 401
+    
     try:
         chat_id = create_new_chat()
+        if not chat_id:
+            return jsonify({"error": "Failed to create new chat"}), 500
+        
         session['current_chat_id'] = chat_id
         
         return jsonify({
@@ -297,9 +471,14 @@ def new_chat():
 
 @app.route("/chats/<chat_id>", methods=["POST"])
 def switch_chat(chat_id):
-    """Switch to a different chat"""
+    if 'user_id' not in session:
+        return jsonify({"error": "Not authenticated"}), 401
+    
     try:
         chat_sessions = get_user_sessions()
+        if not chat_sessions:
+            return jsonify({"error": "No chat sessions"}), 404
+        
         user_id = session['user_id']
         
         if user_id not in chat_sessions or chat_id not in chat_sessions[user_id]:
@@ -321,9 +500,14 @@ def switch_chat(chat_id):
 
 @app.route("/chats/<chat_id>/delete", methods=["POST"])
 def delete_chat(chat_id):
-    """Delete a chat session"""
+    if 'user_id' not in session:
+        return jsonify({"error": "Not authenticated"}), 401
+    
     try:
         chat_sessions = get_user_sessions()
+        if not chat_sessions:
+            return jsonify({"error": "No chat sessions"}), 404
+        
         user_id = session['user_id']
         
         if user_id in chat_sessions and chat_id in chat_sessions[user_id]:
@@ -348,9 +532,24 @@ def delete_chat(chat_id):
 
 @app.route("/current-chat", methods=["GET"])
 def get_current_chat_messages():
-    """Get messages for current chat"""
+    if 'user_id' not in session:
+        return jsonify({
+            "messages": [],
+            "title": "Not Logged In",
+            "message_count": 0,
+            "remaining_messages": 0
+        })
+    
     try:
         current_chat = get_current_chat()
+        if not current_chat:
+            return jsonify({
+                "messages": [],
+                "title": "New Chat",
+                "message_count": 0,
+                "remaining_messages": 10
+            })
+        
         return jsonify({
             "messages": current_chat.get('messages', []),
             "title": current_chat.get('title', 'New Chat'),
@@ -378,5 +577,40 @@ def clear_sessions():
         print(f"Error clearing sessions: {e}")
         return jsonify({"error": "Failed to clear sessions"}), 500
 
+def create_demo_user():
+    """Create a demo user if it doesn't exist"""
+    users = load_users()
+    demo_email = "demo@medibot.com"
+    
+    if demo_email not in users:
+        demo_user = {
+            'user_id': str(uuid.uuid4()),
+            'username': 'Demo User',
+            'email': demo_email,
+            'password': hash_password('Demo123456'),
+            'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        users[demo_email] = demo_user
+        save_users(users)
+        print("\n" + "="*50)
+        print("✅ Demo user created successfully!")
+        print("   Email: demo@medibot.com")
+        print("   Password: Demo123456")
+        print("="*50 + "\n")
+    else:
+        print("\n" + "="*50)
+        print("✅ Demo user already exists")
+        print("   Email: demo@medibot.com")
+        print("   Password: Demo123456")
+        print("="*50 + "\n")
+
 if __name__ == '__main__':
+    # Create empty users.json if it doesn't exist
+    if not os.path.exists(USERS_FILE):
+        save_users({})
+        print("Created new users.json file")
+    
+    # Create demo user
+    create_demo_user()
+    
     app.run(host="0.0.0.0", port=8080, debug=True)

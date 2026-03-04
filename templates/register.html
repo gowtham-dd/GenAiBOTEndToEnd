@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBot - Create Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .auth-header img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            filter: brightness(0) invert(1);
+        }
+
+        .auth-header h2 {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .auth-body {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            color: #a0aec0;
+            font-size: 1.1rem;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control:focus + .input-icon {
+            color: var(--primary-color);
+        }
+
+        .form-control.error {
+            border-color: var(--error-color);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            color: #a0aec0;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+            z-index: 1;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .password-strength {
+            margin-top: 10px;
+        }
+
+        .strength-meter {
+            height: 5px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .strength-meter-fill {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            color: #718096;
+        }
+
+        .password-requirements {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+
+        .requirement i {
+            font-size: 0.9rem;
+        }
+
+        .requirement.valid {
+            color: var(--success-color);
+        }
+
+        .requirement.invalid {
+            color: #a0aec0;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-register:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-register:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-register.loading {
+            color: transparent;
+        }
+
+        .btn-register.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .terms {
+            margin: 25px 0;
+        }
+
+        .terms-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .terms-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .terms-checkbox span {
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .terms-checkbox a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .auth-footer p {
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .auth-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .auth-footer a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-text {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="MediBot">
+                <h2>Create Account</h2>
+                <p>Join MediBot for personalized medical information</p>
+            </div>
+            
+            <div class="auth-body">
+                <div class="alert" id="alertMessage"></div>
+                
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   placeholder="Choose a username" required autofocus>
+                        </div>
+                        <div class="error-message" id="usernameError"></div>
+                        <div class="info-text">Minimum 3 characters</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="Enter your email" required>
+                        </div>
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="Create a password" required>
+                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                        </div>
+                        
+                        <div class="password-strength">
+                            <div class="strength-meter">
+                                <div class="strength-meter-fill" id="strengthMeterFill"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText"></div>
+                        </div>
+
+                        <div class="password-requirements" id="passwordRequirements">
+                            <div class="requirement" id="reqLength">
+                                <i class="fas fa-circle"></i>
+                                <span>At least 8 characters</span>
+                            </div>
+                            <div class="requirement" id="reqUppercase">
+                                <i class="fas fa-circle"></i>
+                                <span>At least one uppercase letter</span>
+                            </div>
+                            <div class="requirement" id="reqLowercase">
+                                <i class="fas fa-circle"></i>
+                                <span>At least one lowercase letter</span>
+                            </div>
+                            <div class="requirement" id="reqNumber">
+                                <i class="fas fa-circle"></i>
+                                <span>At least one number</span>
+                            </div>
+                        </div>
+                        
+                        <div class="error-message" id="passwordError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                                   placeholder="Confirm your password" required>
+                            <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+                        </div>
+                        <div class="error-message" id="confirmPasswordError"></div>
+                    </div>
+
+                    <div class="terms">
+                        <label class="terms-checkbox">
+                            <input type="checkbox" id="terms" required>
+                            <span>I agree to the <a href="#" onclick="alert('Terms of Service will be available soon!')">Terms of Service</a> and <a href="#" onclick="alert('Privacy Policy will be available soon!')">Privacy Policy</a></span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-register" id="registerBtn">
+                        Create Account
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-footer">
+                <p>Already have an account?</p>
+                <a href="{{ url_for('login') }}">Log in</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function() {
+        
+        console.log("✅ DOM fully loaded");
+        console.log("Register page loaded");
+        
+        /* ===============================
+           PASSWORD TOGGLE
+        ================================ */
+        
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        
+        console.log("Toggle password element:", togglePassword);
+        console.log("Password element:", password);
+        
+        if (togglePassword && password) {
+            togglePassword.addEventListener('click', function() {
+                console.log("Toggle password clicked");
+                const type = password.type === 'password' ? 'text' : 'password';
+                password.type = type;
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+        
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const confirmPassword = document.getElementById('confirm_password');
+        
+        if (toggleConfirmPassword && confirmPassword) {
+            toggleConfirmPassword.addEventListener('click', function() {
+                console.log("Toggle confirm password clicked");
+                const type = confirmPassword.type === 'password' ? 'text' : 'password';
+                confirmPassword.type = type;
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+        
+        /* ===============================
+           PASSWORD STRENGTH CHECKER
+        ================================ */
+        
+        function checkPasswordStrength(passwordValue) {
+            const requirements = {
+                length: passwordValue.length >= 8,
+                uppercase: /[A-Z]/.test(passwordValue),
+                lowercase: /[a-z]/.test(passwordValue),
+                number: /\d/.test(passwordValue)
+            };
+        
+            updateRequirement('reqLength', requirements.length);
+            updateRequirement('reqUppercase', requirements.uppercase);
+            updateRequirement('reqLowercase', requirements.lowercase);
+            updateRequirement('reqNumber', requirements.number);
+        
+            const validCount = Object.values(requirements).filter(Boolean).length;
+            let strength = (validCount / 4) * 100;
+        
+            const meterFill = document.getElementById('strengthMeterFill');
+            const strengthText = document.getElementById('strengthText');
+        
+            if (meterFill && strengthText) {
+                meterFill.style.width = strength + '%';
+        
+                if (strength <= 25) {
+                    meterFill.style.backgroundColor = '#ef4444';
+                    strengthText.textContent = 'Weak password';
+                    strengthText.style.color = '#ef4444';
+                } else if (strength <= 50) {
+                    meterFill.style.backgroundColor = '#f59e0b';
+                    strengthText.textContent = 'Fair password';
+                    strengthText.style.color = '#f59e0b';
+                } else if (strength <= 75) {
+                    meterFill.style.backgroundColor = '#3b82f6';
+                    strengthText.textContent = 'Good password';
+                    strengthText.style.color = '#3b82f6';
+                } else {
+                    meterFill.style.backgroundColor = '#10b981';
+                    strengthText.textContent = 'Strong password';
+                    strengthText.style.color = '#10b981';
+                }
+            }
+        
+            return validCount === 4;
+        }
+        
+        function updateRequirement(id, isValid) {
+            const element = document.getElementById(id);
+            if (!element) return;
+        
+            const icon = element.querySelector('i');
+            if (!icon) return;
+        
+            if (isValid) {
+                element.classList.add('valid');
+                element.classList.remove('invalid');
+                icon.className = 'fas fa-check-circle';
+            } else {
+                element.classList.add('invalid');
+                element.classList.remove('valid');
+                icon.className = 'fas fa-circle';
+            }
+        }
+        
+        if (password) {
+            password.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+            });
+        }
+        
+        /* ===============================
+           ERROR HANDLING
+        ================================ */
+        
+        function showError(field, message) {
+            const errorElement = document.getElementById(field + 'Error');
+            const inputElement = document.getElementById(field);
+            if (!errorElement || !inputElement) return;
+        
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            inputElement.classList.add('error');
+        }
+        
+        function clearError(field) {
+            const errorElement = document.getElementById(field + 'Error');
+            const inputElement = document.getElementById(field);
+            if (!errorElement || !inputElement) return;
+        
+            errorElement.classList.remove('show');
+            inputElement.classList.remove('error');
+        }
+        
+        function clearAllErrors() {
+            ['username', 'email', 'password', 'confirm_password'].forEach(clearError);
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertMessage');
+            if (!alert) return;
+        
+            alert.textContent = message;
+            alert.className = 'alert show alert-' + type;
+        
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+        
+        /* ===============================
+           FORM SUBMISSION
+        ================================ */
+        
+        const registerForm = document.getElementById('registerForm');
+        console.log("Register form:", registerForm);
+        
+        if (!registerForm) {
+            console.error("❌ registerForm NOT FOUND");
+            return;
+        }
+        
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log("🚀 Form submitted");
+        
+            const username = document.getElementById('username')?.value.trim();
+            const email = document.getElementById('email')?.value.trim();
+            const passwordValue = document.getElementById('password')?.value;
+            const confirm_password = document.getElementById('confirm_password')?.value;
+            const terms = document.getElementById('terms')?.checked;
+            const registerBtn = document.getElementById('registerBtn');
+        
+            console.log("Form data:", { username, email, terms });
+        
+            clearAllErrors();
+        
+            let isValid = true;
+        
+            if (!username || username.length < 3) {
+                showError('username', 'Username must be at least 3 characters');
+                isValid = false;
+            }
+        
+            if (!email || !/\S+@\S+\.\S+/.test(email)) {
+                showError('email', 'Enter valid email');
+                isValid = false;
+            }
+        
+            if (!passwordValue || !checkPasswordStrength(passwordValue)) {
+                showError('password', 'Password not strong enough');
+                isValid = false;
+            }
+        
+            if (passwordValue !== confirm_password) {
+                showError('confirm_password', 'Passwords do not match');
+                isValid = false;
+            }
+        
+            if (!terms) {
+                showAlert('Accept terms to continue', 'error');
+                isValid = false;
+            }
+        
+            if (!isValid) {
+                console.log("❌ Validation failed");
+                return;
+            }
+        
+            if (registerBtn) {
+                registerBtn.disabled = true;
+                registerBtn.classList.add('loading');
+            }
+        
+            try {
+                console.log("📡 Sending request to backend...");
+        
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password: passwordValue
+                    })
+                });
+        
+                console.log("Response status:", response.status);
+        
+                const data = await response.json();
+                console.log("Response JSON:", data);
+        
+                if (data.success) {
+                    showAlert('Registration successful! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = '/login', 2000);
+                } else {
+                    showAlert(data.error || 'Registration failed', 'error');
+                }
+        
+            } catch (error) {
+                console.error("🔥 Fetch error:", error);
+                showAlert('Server error occurred', 'error');
+            } finally {
+                if (registerBtn) {
+                    registerBtn.disabled = false;
+                    registerBtn.classList.remove('loading');
+                }
+            }
+        });
+        
+        /* ===============================
+           AUTH CHECK
+        ================================ */
+        
+        async function checkAuth() {
+            try {
+                const response = await fetch('/check-auth');
+                const data = await response.json();
+                console.log("Auth check:", data);
+        
+                if (data.authenticated) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+            }
+        }
+        
+        checkAuth();
+        
+        }); // DOMContentLoaded END
+        
+        </script>
+</body>
+</html>

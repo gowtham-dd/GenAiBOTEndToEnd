@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBot - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .auth-header img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            filter: brightness(0) invert(1);
+        }
+
+        .auth-header h2 {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .auth-body {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            color: #a0aec0;
+            font-size: 1.1rem;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control:focus + .input-icon {
+            color: var(--primary-color);
+        }
+
+        .form-control.error {
+            border-color: var(--error-color);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            color: #a0aec0;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+            z-index: 1;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-login.loading {
+            color: transparent;
+        }
+
+        .btn-login.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .auth-footer p {
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .auth-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .auth-footer a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .remember-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .remember-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .remember-checkbox span {
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        .social-login {
+            margin-top: 30px;
+        }
+
+        .social-login p {
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .social-login p::before,
+        .social-login p::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .social-login p::before {
+            left: 0;
+        }
+
+        .social-login p::after {
+            right: 0;
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #4a5568;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .demo-credentials {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .demo-credentials p {
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .demo-credentials code {
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            border: 1px solid #e2e8f0;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .demo-credentials button {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .demo-credentials button:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="MediBot">
+                <h2>Welcome Back!</h2>
+                <p>Log in to continue your medical conversations</p>
+            </div>
+            
+            <div class="auth-body">
+                <div class="alert" id="alertMessage"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="Enter your email" required autofocus>
+                        </div>
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="Enter your password" required>
+                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                        </div>
+                        <div class="error-message" id="passwordError"></div>
+                    </div>
+
+                    <div class="remember-me">
+                        <label class="remember-checkbox">
+                            <input type="checkbox" id="rememberMe">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-password" onclick="alert('Password reset feature coming soon!')">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-login" id="loginBtn">
+                        Log In
+                    </button>
+                </form>
+
+                <div class="social-login">
+                    <p>Or continue with</p>
+                    <div class="social-buttons">
+                        <button class="social-btn" title="Google" onclick="alert('Google login coming soon!')">
+                            <i class="fab fa-google"></i>
+                        </button>
+                        <button class="social-btn" title="GitHub" onclick="alert('GitHub login coming soon!')">
+                            <i class="fab fa-github"></i>
+                        </button>
+                        <button class="social-btn" title="Microsoft" onclick="alert('Microsoft login coming soon!')">
+                            <i class="fab fa-microsoft"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="demo-credentials">
+                    <p><i class="fas fa-flask"></i> Demo Credentials</p>
+                    <div>
+                        <code>demo@medibot.com</code>
+                        <code>Demo123456</code>
+                    </div>
+                    <button onclick="fillDemoCredentials()">Use Demo Account</button>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                <p>Don't have an account?</p>
+                <a href="{{ url_for('register') }}">Create a free account</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       console.log("Login page loaded");
+
+// Password visibility toggle
+const togglePassword = document.getElementById('togglePassword');
+const password = document.getElementById('password');
+console.log("Toggle password element:", togglePassword);
+console.log("Password element:", password);
+
+if (togglePassword) {
+    togglePassword.addEventListener('click', function() {
+        console.log("Toggle password clicked");
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+}
+
+      
+
+        // Show error function
+        function showError(field, message) {
+            const errorElement = document.getElementById(field + 'Error');
+            const inputElement = document.getElementById(field);
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            inputElement.classList.add('error');
+        }
+
+        // Clear error function
+        function clearError(field) {
+            const errorElement = document.getElementById(field + 'Error');
+            const inputElement = document.getElementById(field);
+            errorElement.classList.remove('show');
+            inputElement.classList.remove('error');
+        }
+
+        // Show alert function
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertMessage');
+            alert.textContent = message;
+            alert.className = 'alert show alert-' + type;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Clear all errors
+        function clearAllErrors() {
+            ['email', 'password'].forEach(clearError);
+        }
+
+       // Fill demo credentials
+function fillDemoCredentials() {
+    console.log("Filling demo credentials");
+    document.getElementById('email').value = 'demo@medibot.com';
+    document.getElementById('password').value = 'Demo123456';
+    clearAllErrors();
+    
+    // Optionally auto submit
+    // setTimeout(() => {
+    //     document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+    // }, 500);
+}
+
+        // Form submission
+const loginForm = document.getElementById('loginForm');
+console.log("Login form:", loginForm);
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    console.log("Form submitted - starting login process");
+    
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    const loginBtn = document.getElementById('loginBtn');
+    
+    console.log("Form data:", { email, password: password ? '******' : 'empty', rememberMe });
+    
+    // Clear previous errors
+    clearAllErrors();
+    
+    // Validation
+    let isValid = true;
+    
+    if (!email) {
+        console.log("Validation failed: Email empty");
+        showError('email', 'Email is required');
+        isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+        console.log("Validation failed: Invalid email format");
+        showError('email', 'Please enter a valid email address');
+        isValid = false;
+    }
+    
+    if (!password) {
+        console.log("Validation failed: Password empty");
+        showError('password', 'Password is required');
+        isValid = false;
+    } else if (password.length < 8) {
+        console.log("Validation failed: Password too short");
+        showError('password', 'Password must be at least 8 characters');
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        console.log("Validation failed, stopping submission");
+        return;
+    }
+    
+    console.log("Validation passed, sending request to server...");
+    
+    // Show loading state
+    loginBtn.disabled = true;
+    loginBtn.classList.add('loading');
+    
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
+        
+        const data = await response.json();
+        console.log("Response data:", data);
+        
+        if (data.success) {
+            console.log("Login successful!");
+            showAlert('Login successful! Redirecting...', 'success');
+            
+            // Redirect to chat page after a short delay
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        } else {
+            console.log("Login failed:", data.error);
+            showAlert(data.error || 'Login failed', 'error');
+            loginBtn.disabled = false;
+            loginBtn.classList.remove('loading');
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        showAlert('An error occurred. Please try again.', 'error');
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('loading');
+    }
+});
+        // Input focus effects
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                const icon = this.parentElement.querySelector('.input-icon');
+                if (icon) icon.style.color = 'var(--primary-color)';
+            });
+            
+            input.addEventListener('blur', function() {
+                const icon = this.parentElement.querySelector('.input-icon');
+                if (icon) icon.style.color = '#a0aec0';
+            });
+        });
+
+        // Check if user is already logged in
+        async function checkAuth() {
+            try {
+                const response = await fetch('/check-auth');
+                const data = await response.json();
+                if (data.authenticated) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+            }
+        }
+
+        // Run on page load
+        checkAuth();
+    </script>
+</body>
+</html>
