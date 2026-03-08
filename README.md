@@ -1,4 +1,4 @@
-# 🏥 Build a Complete Medical Chatbot with LLMs, LangChain, Pinecone, Flask & AWS
+# 🏥 Build a Complete Medical Chatbot with LLMs, LangChain, Pinecone, Flask, GitHub Actions & AZURE
 
 An end-to-end Medical Chatbot built using **LangChain, Groq LLM, HuggingFace Embeddings, Pinecone Vector Database, and Flask**.
 
@@ -126,7 +126,7 @@ http://localhost:8080
 - Python 3.11  
 - LangChain  
 - Flask  
-- Groq LLM  
+- Groq LPU  
 - HuggingFace Embeddings  
 - Pinecone Vector Database  
 
@@ -138,7 +138,7 @@ http://localhost:8080
 2. Convert text → embeddings (384-dimension vectors)  
 3. Store embeddings inside Pinecone (`medical-bot` namespace)  
 4. Perform similarity search  
-5. Send retrieved context to Groq LLM  
+5. Send retrieved context to Groq Lama3 Model  
 6. Generate medical response  
 
 ---
